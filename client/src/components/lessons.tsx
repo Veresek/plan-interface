@@ -1,6 +1,5 @@
 "use client";
 import { getLessons } from "@/lib/lessons";
-import { Lesson } from "../types/types";
 import { useState, useEffect, useMemo } from "react";
 import {
 	Table,
@@ -11,19 +10,20 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { FilterSelect } from "@/components/filter-select";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import { numToDay, numToHour } from "@/utils/parseHelpers";
+	distinctNumbers,
+	distinctStrings,
+	isCompleteLesson,
+	numToDay,
+	numToHour,
+	type ParsedLesson,
+} from "@/utils/parseHelpers";
 
 const ALL = "all";
 
 export default function Lessons() {
-	const [data, setData] = useState<Lesson[] | null>(null);
+	const [data, setData] = useState<ParsedLesson[] | null>(null);
 	const [search, setSearch] = useState("");
 	const [day, setDay] = useState(ALL);
 	const [hour, setHour] = useState(ALL);
@@ -32,13 +32,15 @@ export default function Lessons() {
 
 	useEffect(() => {
 		getLessons().then(res => {
-			setData(res);
+			// Unparsed rows (null subject/teacher/room) would render as "null"
+			// in the table and pollute the filter dropdowns.
+			setData(res.filter(isCompleteLesson));
 		});
 	}, []);
 
 	const dayItems = useMemo(() => {
 		const items: Record<string, string> = { [ALL]: "All days" };
-		for (const d of [...new Set(data?.map(row => row.day) ?? [])].sort((a, b) => a - b)) {
+		for (const d of distinctNumbers((data ?? []).map(row => row.day))) {
 			items[String(d)] = numToDay(d);
 		}
 		return items;
@@ -46,7 +48,7 @@ export default function Lessons() {
 
 	const hourItems = useMemo(() => {
 		const items: Record<string, string> = { [ALL]: "All hours" };
-		for (const h of [...new Set(data?.map(row => row.hour) ?? [])].sort((a, b) => a - b)) {
+		for (const h of distinctNumbers((data ?? []).map(row => row.hour))) {
 			items[String(h)] = numToHour(h);
 		}
 		return items;
@@ -54,7 +56,7 @@ export default function Lessons() {
 
 	const roomItems = useMemo(() => {
 		const items: Record<string, string> = { [ALL]: "All rooms" };
-		for (const r of [...new Set(data?.map(row => row.room) ?? [])].sort()) {
+		for (const r of distinctStrings((data ?? []).map(row => row.room))) {
 			items[r] = r;
 		}
 		return items;
@@ -62,7 +64,7 @@ export default function Lessons() {
 
 	const teacherItems = useMemo(() => {
 		const items: Record<string, string> = { [ALL]: "All teachers" };
-		for (const t of [...new Set(data?.map(row => row.teacher_name) ?? [])].sort()) {
+		for (const t of distinctStrings((data ?? []).map(row => row.teacher_name))) {
 			items[t] = t;
 		}
 		return items;
@@ -92,54 +94,30 @@ export default function Lessons() {
 					onChange={e => setSearch(e.target.value)}
 					className="max-w-60"
 				/>
-				<Select value={day} onValueChange={v => setDay(v ?? ALL)} items={dayItems}>
-					<SelectTrigger className="w-40">
-						<SelectValue />
-					</SelectTrigger>
-					<SelectContent>
-						{Object.entries(dayItems).map(([value, label]) => (
-							<SelectItem key={value} value={value}>
-								{label}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
-				<Select value={hour} onValueChange={v => setHour(v ?? ALL)} items={hourItems}>
-					<SelectTrigger className="w-44">
-						<SelectValue />
-					</SelectTrigger>
-					<SelectContent>
-						{Object.entries(hourItems).map(([value, label]) => (
-							<SelectItem key={value} value={value}>
-								{label}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
-				<Select value={room} onValueChange={v => setRoom(v ?? ALL)} items={roomItems}>
-					<SelectTrigger className="w-36">
-						<SelectValue />
-					</SelectTrigger>
-					<SelectContent>
-						{Object.entries(roomItems).map(([value, label]) => (
-							<SelectItem key={value} value={value}>
-								{label}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
-				<Select value={teacher} onValueChange={v => setTeacher(v ?? ALL)} items={teacherItems}>
-					<SelectTrigger className="w-48">
-						<SelectValue />
-					</SelectTrigger>
-					<SelectContent>
-						{Object.entries(teacherItems).map(([value, label]) => (
-							<SelectItem key={value} value={value}>
-								{label}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
+				<FilterSelect
+					value={day}
+					onValueChange={v => setDay(v ?? ALL)}
+					items={dayItems}
+					triggerClassName="w-40"
+				/>
+				<FilterSelect
+					value={hour}
+					onValueChange={v => setHour(v ?? ALL)}
+					items={hourItems}
+					triggerClassName="w-44"
+				/>
+				<FilterSelect
+					value={room}
+					onValueChange={v => setRoom(v ?? ALL)}
+					items={roomItems}
+					triggerClassName="w-36"
+				/>
+				<FilterSelect
+					value={teacher}
+					onValueChange={v => setTeacher(v ?? ALL)}
+					items={teacherItems}
+					triggerClassName="w-48"
+				/>
 			</div>
 			<Table>
 				<TableHeader>
@@ -161,9 +139,9 @@ export default function Lessons() {
 	);
 }
 
-function LessonRow(row: Lesson) {
+function LessonRow(row: ParsedLesson) {
 	return (
-		<TableRow key={row.id}>
+		<TableRow>
 			<TableCell>{numToDay(row.day)}</TableCell>
 			<TableCell>{numToHour(row.hour)}</TableCell>
 			<TableCell>{row.room}</TableCell>
