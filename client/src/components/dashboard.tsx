@@ -8,7 +8,14 @@ import {
 	numToHourStart,
 	type ParsedLesson,
 } from "@/utils/parseHelpers";
-import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
+import {
+	Bar,
+	BarChart,
+	CartesianGrid,
+	LabelList,
+	XAxis,
+	YAxis,
+} from "recharts";
 import {
 	ChartContainer,
 	ChartTooltip,
@@ -49,7 +56,10 @@ function slotCounts(
 		.map(([num, value]) => ({ label: label(num), value }));
 }
 
-function sortedCounts(rows: ParsedLesson[], key: (row: ParsedLesson) => string) {
+function sortedCounts(
+	rows: ParsedLesson[],
+	key: (row: ParsedLesson) => string,
+) {
 	return [...countBy(rows, key).entries()]
 		.map(([label, value]) => ({ label, value }))
 		.sort((a, b) => b.value - a.value || a.label.localeCompare(b.label));
@@ -77,13 +87,19 @@ export default function Dashboard() {
 		};
 	}, [data, valid]);
 
-	const byDay = useMemo(() => slotCounts(data ?? [], r => r.day, numToDay), [data]);
+	const byDay = useMemo(
+		() => slotCounts(data ?? [], r => r.day, numToDay),
+		[data],
+	);
 	const byHour = useMemo(
 		() => slotCounts(data ?? [], r => r.hour, numToHourStart),
 		[data],
 	);
 
-	const teacherLoad = useMemo(() => sortedCounts(valid, r => r.teacher_name), [valid]);
+	const teacherLoad = useMemo(
+		() => sortedCounts(valid, r => r.teacher_name),
+		[valid],
+	);
 	const roomLoad = useMemo(() => sortedCounts(valid, r => r.room), [valid]);
 
 	if (!data) {
@@ -154,7 +170,12 @@ function ColumnChart({ data }: { data: { label: string; value: number }[] }) {
 		<ChartContainer config={chartConfig} className="h-64 w-full">
 			<BarChart data={data} margin={{ top: 20, right: 8, left: 0, bottom: 0 }}>
 				<CartesianGrid vertical={false} strokeDasharray="3 3" />
-				<XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
+				<XAxis
+					dataKey="label"
+					tickLine={false}
+					axisLine={false}
+					tickMargin={8}
+				/>
 				<ChartTooltip content={<ChartTooltipContent />} cursor={false} />
 				<Bar dataKey="value" fill="var(--color-value)" radius={4}>
 					<LabelList
@@ -191,6 +212,7 @@ function BarList({ data }: { data: { label: string; value: number }[] }) {
 						axisLine={false}
 						tickMargin={8}
 					/>
+					<XAxis type="number" hide />
 					<ChartTooltip content={<ChartTooltipContent />} cursor={false} />
 					<Bar dataKey="value" fill="var(--color-value)" radius={4}>
 						<LabelList
