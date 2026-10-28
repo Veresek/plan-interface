@@ -32,8 +32,6 @@ export default function Lessons() {
 
 	useEffect(() => {
 		getLessons().then(res => {
-			// Unparsed rows (null subject/teacher/room) would render as "null"
-			// in the table and pollute the filter dropdowns.
 			setData(res.filter(isCompleteLesson));
 		});
 	}, []);

@@ -1,5 +1,3 @@
-// Mirrors server/src/lib/db/types.ts. Scraped-but-unparsed lessons (is_parsed = 0)
-// arrive with subject/teacher/room nulled out and only raw_text populated.
 export type Lesson = {
 	id: number;
 	day: number;

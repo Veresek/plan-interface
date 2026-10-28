@@ -56,12 +56,8 @@ export default function Availability() {
 		getLessons().then(setData);
 	}, []);
 
-	// Entity views only ever show fully parsed lessons, so an unparsed row can
-	// never render a literal "null" room, teacher or subject.
 	const parsed = useMemo(() => (data ?? []).filter(isCompleteLesson), [data]);
 
-	// The school's operating window: every day/hour used anywhere in the plan,
-	// including slots held by unparsed rows.
 	const days = useMemo(() => distinctNumbers((data ?? []).map(r => r.day)), [data]);
 	const hours = useMemo(() => distinctNumbers((data ?? []).map(r => r.hour)), [data]);
 
@@ -75,8 +71,6 @@ export default function Availability() {
 		[targets],
 	);
 
-	// Derived so the selection stays valid when the kind changes or data loads,
-	// without synchronizing state in an effect.
 	const selected = targets.includes(target) ? target : (targets[0] ?? "");
 
 	const busy = useMemo(() => {
@@ -91,8 +85,6 @@ export default function Availability() {
 		return map;
 	}, [parsed, kind, selected]);
 
-	// Every busy key is a (day, hour) pair drawn from the same rows that built
-	// the day and hour lists, so busyCount can never exceed totalSlots.
 	const totalSlots = days.length * hours.length;
 	const busyCount = busy.size;
 	const freeCount = totalSlots - busyCount;

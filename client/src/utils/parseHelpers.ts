@@ -1,9 +1,5 @@
 import { Lesson } from "@/types/types";
 
-// A lesson the scraper fully resolved. Unparsed lessons (is_parsed = 0) come
-// from the API with null subject/teacher/room and only raw_text set; they still
-// occupy a real day/hour slot, so they count toward slot totals but must never
-// surface as "null" in an entity view.
 export type ParsedLesson = Lesson & {
 	subject: string;
 	teacher_name: string;

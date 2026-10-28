@@ -72,8 +72,6 @@ export default function Dashboard() {
 		getLessons().then(setData);
 	}, []);
 
-	// Unparsed lessons still occupy real day/hour slots, so they count toward
-	// totals and the day/hour charts, but never surface as "null" categories.
 	const valid = useMemo(() => (data ?? []).filter(isCompleteLesson), [data]);
 
 	const stats = useMemo(() => {
@@ -190,8 +188,6 @@ function ColumnChart({ data }: { data: { label: string; value: number }[] }) {
 	);
 }
 
-// Bars carry their value as a direct label, so the numeric axis would only
-// repeat it; the categorical axis on the left is the one worth keeping.
 function BarList({ data }: { data: { label: string; value: number }[] }) {
 	return (
 		<div className="h-80 overflow-y-auto">

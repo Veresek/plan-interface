@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 
-// controllers
 import { countLessonsByTeacherAndSubject } from "./controllers/lessons/count";
 import { getAllRooms } from "./controllers/rooms/all";
 import { getAvailableRooms } from "./controllers/rooms/available";

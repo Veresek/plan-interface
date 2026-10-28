@@ -17,7 +17,6 @@ async function main() {
         throw new Error("SCHEDULE_BASE_URL is undefined.");
     }
 
-    // inits DB
     getDb();
 
     await fillDbIfEmpty();

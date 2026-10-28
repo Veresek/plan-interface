@@ -13,7 +13,6 @@ export async function parseClassSchedule(scheduleUrl: URL, className: string): P
     const DAYS_IN_SCHEDULE = 5;
     const schedule: Lesson[] = [];
 
-    // skip the first row, which contains only meta data
     const rows =  $('table[class="tabela"] tr').not(':first');
 
     for (let hour = 0; hour < rows.length; ++hour) {
